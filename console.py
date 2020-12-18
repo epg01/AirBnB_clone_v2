@@ -135,7 +135,7 @@ class HBNBCommand(cmd.Cmd):
         for arg in args[1:]:
             data = arg.split("=")
             key = data[0]
-            value = data[1].replace("_", " ")
+            value = data[1].replace("_", " ").replace('"', '\"')
 
             if hasattr(new_instance, key):
                 try:
