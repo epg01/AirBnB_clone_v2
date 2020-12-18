@@ -118,6 +118,9 @@ class HBNBCommand(cmd.Cmd):
         Exceptions:
             SyntaxError: no args
             NameError: no existing class
+            function of your command interpreter 
+            (console.py) to allow for object creation 
+            with given parameters:
         """
         if not args:
             print("** class name missing **")
