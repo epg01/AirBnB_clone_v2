@@ -7,7 +7,7 @@ import os
 from fabric.api import run, local, sudo, env
 from datetime import datetime
 dt = datetime.now()
-env.hosts = ['34.75.62.202', '35.237.236.118']
+env.hosts = ['35.237.222.244', '34.73.185.36']
 def do_pack():
     """ Packs web_static files into .tgz file
     """
