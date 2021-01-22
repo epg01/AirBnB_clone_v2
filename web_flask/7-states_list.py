@@ -1,20 +1,27 @@
 #!/usr/bin/python3
+'''
+script that starts a Flask web application
+'''
 from flask import Flask, render_template
-from models.state import State
 from models import storage
+from models.state import State
 app = Flask(__name__)
 
 
-@app.route('/states_list', strict_slashes=False)
-def state_list():
-    all_obj = storage.all(State)
-    return render_template('7-states_list.html', states=all_obj)
-
-
 @app.teardown_appcontext
-def teardown_context_session(self):
-    return storage.close()
+def teardown(exception):
+    '''each request you must remove the current SQLAlchemy Session
+    '''
+    storage.close()
 
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='5000')
+@app.route('/states_list', strict_slashes=False)
+def states_list():
+    '''
+    list of states from a storage
+    '''
+    states = storage.all('State')
+    return render_template("7-states_list.html", states=states)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

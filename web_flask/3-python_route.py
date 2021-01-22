@@ -1,28 +1,43 @@
 #!/usr/bin/python3
+'''
+Script to start a flask web application
+'''
 from flask import Flask
 app = Flask(__name__)
 
 
 @app.route('/', strict_slashes=False)
-def index():
-    return "Hello HBNB!"
+def Hello_HBNB():
+    '''
+    method to display “Hello HBNB!
+    '''
+    return 'Hello HBNB!'
 
 
 @app.route('/hbnb', strict_slashes=False)
 def hbnb():
-    return "HBNB"
+    '''
+    method to display HBNB
+    '''
+    return 'HBNB'
 
 
 @app.route('/c/<text>', strict_slashes=False)
 def c_route(text):
-    return 'C %s' % text.replace("_", " ")
+    '''
+    method to display c/text replacing '_' by ' '
+    '''
+    return 'C {}'.format(text.replace('_', ' '))
 
 
-@app.route('/python', strict_slashes=False)
+@app.route('/python/', strict_slashes=False, defaults={'text': 'is cool'})
 @app.route('/python/<text>', strict_slashes=False)
-def python_route(text='is cool'):
-    return 'Python %s' % text.replace("_", " ")
+def python_route(text):
+    '''
+    method to display Python/text with default value
+    '''
+    return 'Python {}'.format(text.replace('_', ' '))
 
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='5000')
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
