@@ -1,63 +1,76 @@
 #!/usr/bin/python3
-"""Unittest for Review class """
-from os import getenv
-import models
+"""test for review"""
 import unittest
-from tests.test_models.test_base_model import test_basemodel
-from models.city import City
-from models.state import State
-from models.city import City
-from models.user import User
+import os
 from models.review import Review
-from models.place import Place
-from sqlalchemy.exc import OperationalError
+from models.base_model import BaseModel
+import pep8
 
 
-class test_review(test_basemodel):
-    """Unittest for Review class... """
+class TestReview(unittest.TestCase):
+    """this will test the place class"""
 
-    def __init__(self, *args, **kwargs):
-        """Instantiation """
-        super().__init__(*args, **kwargs)
-        self.name = "Review"
-        self.value = Review
-        self.state = State(name="Florida")
-        self.city = City(name="Miami", state_id=self.state.id)
-        self.user = User(name="Oscar_the_father", email="the_father@yahoo.com")
-        self.place = Place(
-            user_id=self.user.id, city_id=self.city.id, name="San_Luis",
-            number_rooms=6, number_bathrooms=4, max_guest=5,
-            price_by_night=230)
-        self.review = Review(place_id=self.place.id, text="Awesome Place",
-                             user_id=self.user.id)
+    @classmethod
+    def setUpClass(cls):
+        """set up for test"""
+        cls.rev = Review()
+        cls.rev.place_id = "4321-dcba"
+        cls.rev.user_id = "123-bca"
+        cls.rev.text = "The srongest in the Galaxy"
 
-    def test_place_id(self):
-        """ test place id in review class"""
-        self.assertEqual(type(self.review.place_id), str)
-        self.assertEqual(self.review.place_id, self.place.id)
+    @classmethod
+    def teardown(cls):
+        """at the end of the test this will tear it down"""
+        del cls.rev
 
-    def test_user_id(self):
-        """ test user id in review class"""
-        self.assertEqual(type(self.review.user_id), str)
-        self.assertEqual(self.review.user_id, self.user.id)
+    def tearDown(self):
+        """teardown"""
+        try:
+            os.remove("file.json")
+        except Exception:
+            pass
 
-    def test_text(self):
-        """ test to check the text in review class"""
-        self.assertEqual(type(self.review.text), str)
-        self.assertEqual(self.review.text, "Awesome Place")
+    def test_pep8_Review(self):
+        """Tests pep8 style"""
+        style = pep8.StyleGuide(quiet=True)
+        p = style.check_files(['models/review.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
 
-    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') != 'db', "not supported")
-    def test_without_mandatory_arguments(self):
-        """Check """
-        new = self.value()
-        with self.assertRaises(OperationalError):
-            try:
-                new.save()
-            except Exception as error:
-                models.storage._DBStorage__session.rollback()
-                raise error
+    def test_checking_for_docstring_Review(self):
+        """checking for docstrings"""
+        self.assertIsNotNone(Review.__doc__)
 
-    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') == 'db', "not supported")
-    def test_is_subclass(self):
-        """Check that Review is a subclass of Basemodel"""
-        self.assertTrue(isinstance(self.review, Review))
+    def test_attributes_review(self):
+        """chekcing if review have attributes"""
+        self.assertTrue('id' in self.rev.__dict__)
+        self.assertTrue('created_at' in self.rev.__dict__)
+        self.assertTrue('updated_at' in self.rev.__dict__)
+        self.assertTrue('place_id' in self.rev.__dict__)
+        self.assertTrue('text' in self.rev.__dict__)
+        self.assertTrue('user_id' in self.rev.__dict__)
+
+    def test_is_subclass_Review(self):
+        """test if review is subclass of BaseModel"""
+        self.assertTrue(issubclass(self.rev.__class__, BaseModel), True)
+
+    def test_attribute_types_Review(self):
+        """test attribute type for Review"""
+        self.assertEqual(type(self.rev.text), str)
+        self.assertEqual(type(self.rev.place_id), str)
+        self.assertEqual(type(self.rev.user_id), str)
+
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') == 'db',
+        "This test only work in Filestorage")
+    def test_save_Review(self):
+        """test if the save works"""
+        self.rev.save()
+        self.assertNotEqual(self.rev.created_at, self.rev.updated_at)
+
+    def test_to_dict_Review(self):
+        """test if dictionary works"""
+        self.assertEqual('to_dict' in dir(self.rev), True)
+
+
+if __name__ == "__main__":
+    unittest.main()

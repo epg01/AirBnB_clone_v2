@@ -1,97 +1,100 @@
 #!/usr/bin/python3
-"""unitest for testing Place class """
-import models
-from os import getenv
+"""test for place"""
 import unittest
-from tests.test_models.test_base_model import test_basemodel
+import os
 from models.place import Place
-from models.city import City
-from models.user import User
-from models.state import State
-from sqlalchemy.exc import OperationalError
+from models.base_model import BaseModel
+import pep8
 
 
-class test_Place(test_basemodel):
-    """Unittests for testing the place class..."""
+class TestPlace(unittest.TestCase):
+    """this will test the place class"""
 
-    def __init__(self, *args, **kwargs):
-        """ inicialization values """
-        super().__init__(*args, **kwargs)
-        self.name = "Place"
-        self.value = Place
-        self.state = State(name="California")
-        self.city = City(name="San_Jose", state_id=self.state.id)
-        self.user = User(name="Chepe", email="cheperramito@yahoo.com")
-        self.place = Place(
-            user_id=self.user.id, city_id=self.city.id, name="Laurita",
-            number_rooms=3, number_bathrooms=2, max_guest=4,
-            price_by_night=100)
+    @classmethod
+    def setUpClass(cls):
+        """set up for test"""
+        cls.place = Place()
+        cls.place.city_id = "1234-abcd"
+        cls.place.user_id = "4321-dcba"
+        cls.place.name = "Death Star"
+        cls.place.description = "UNLIMITED POWER!!!!!"
+        cls.place.number_rooms = 1000000
+        cls.place.number_bathrooms = 1
+        cls.place.max_guest = 607360
+        cls.place.price_by_night = 10
+        cls.place.latitude = 160.0
+        cls.place.longitude = 120.0
+        cls.place.amenity_ids = ["1324-lksdjkl"]
 
-    def test_city_id(self):
-        """ test city id """
+    @classmethod
+    def teardown(cls):
+        """at the end of the test this will tear it down"""
+        del cls.place
+
+    def tearDown(self):
+        """teardown"""
+        try:
+            os.remove("file.json")
+        except Exception:
+            pass
+
+    def test_pep8_Place(self):
+        """Tests pep8 style"""
+        style = pep8.StyleGuide(quiet=True)
+        p = style.check_files(['models/place.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
+
+    def test_checking_for_docstring_Place(self):
+        """checking for docstrings"""
+        self.assertIsNotNone(Place.__doc__)
+
+    def test_attributes_Place(self):
+        """chekcing if amenity have attributes"""
+        self.assertTrue('id' in self.place.__dict__)
+        self.assertTrue('created_at' in self.place.__dict__)
+        self.assertTrue('updated_at' in self.place.__dict__)
+        self.assertTrue('city_id' in self.place.__dict__)
+        self.assertTrue('user_id' in self.place.__dict__)
+        self.assertTrue('name' in self.place.__dict__)
+        self.assertTrue('description' in self.place.__dict__)
+        self.assertTrue('number_rooms' in self.place.__dict__)
+        self.assertTrue('number_bathrooms' in self.place.__dict__)
+        self.assertTrue('max_guest' in self.place.__dict__)
+        self.assertTrue('price_by_night' in self.place.__dict__)
+        self.assertTrue('latitude' in self.place.__dict__)
+        self.assertTrue('longitude' in self.place.__dict__)
+        self.assertTrue('amenity_ids' in self.place.__dict__)
+
+    def test_is_subclass_Place(self):
+        """test if Place is subclass of Basemodel"""
+        self.assertTrue(issubclass(self.place.__class__, BaseModel), True)
+
+    def test_attribute_types_Place(self):
+        """test attribute type for Place"""
         self.assertEqual(type(self.place.city_id), str)
-        self.assertEqual(self.city.id, self.place.city_id)
-
-    def test_user_id(self):
-        """ test user id """
         self.assertEqual(type(self.place.user_id), str)
-        self.assertEqual(self.user.id, self.place.user_id)
-
-    def test_name(self):
-        """ test name """
         self.assertEqual(type(self.place.name), str)
-        self.assertEqual(type(self.place.name), str)
-
-    def test_description(self):
-        """ test description"""
-        self.assertEqual(self.place.description, None)
-
-    def test_number_rooms(self):
-        """ test number of rooms"""
+        self.assertEqual(type(self.place.description), str)
         self.assertEqual(type(self.place.number_rooms), int)
-        self.assertEqual(self.place.number_rooms, 3)
-
-    def test_number_bathrooms(self):
-        """ check number of bathrooms """
         self.assertEqual(type(self.place.number_bathrooms), int)
-        self.assertEqual(self.place.number_bathrooms, 2)
-
-    def test_max_guest(self):
-        """test the max of guest """
         self.assertEqual(type(self.place.max_guest), int)
-        self.assertEqual(self.place.max_guest, 4)
-
-    def test_price_by_night(self):
-        """ test cost or price by night """
         self.assertEqual(type(self.place.price_by_night), int)
-        self.assertEqual(self.place.price_by_night, 100)
-
-    def test_latitude(self):
-        """test amenity latitude"""
-        self.assertEqual(self.place.latitude, None)
-
-    def test_longitude(self):
-        """test amenity longitude"""
-        self.assertEqual(self.place.longitude, None)
-
-    def test_amenity_ids(self):
-        """ test amenity ids"""
+        self.assertEqual(type(self.place.latitude), float)
+        self.assertEqual(type(self.place.longitude), float)
         self.assertEqual(type(self.place.amenity_ids), list)
-        self.assertEqual(self.place.amenity_ids, [])
 
-    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') != 'db', "not supported")
-    def test_without_mandatory_arguments(self):
-        """test without mandatory arguments """
-        new = self.value()
-        with self.assertRaises(OperationalError):
-            try:
-                new.save()
-            except Exception as error:
-                models.storage._DBStorage__session.rollback()
-                raise error
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') == 'db',
+        "This test only work in Filestorage")
+    def test_save_Place(self):
+        """test if the save works"""
+        self.place.save()
+        self.assertNotEqual(self.place.created_at, self.place.updated_at)
 
-    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') == 'db', "not supported")
-    def test_is_subclass(self):
-        """Check that Place is a subclass of Basemodel"""
-        place = self.value()
-        self.assertTrue(isinstance(place, Place))
+    def test_to_dict_Place(self):
+        """test if dictionary works"""
+        self.assertEqual('to_dict' in dir(self.place), True)
+
+
+if __name__ == "__main__":
+    unittest.main()

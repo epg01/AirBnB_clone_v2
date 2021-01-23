@@ -1,53 +1,79 @@
 #!/usr/bin/python3
-"""Unittests for testing the User class... """
-import models
-from os import getenv
+"""test for user"""
 import unittest
-from tests.test_models.test_base_model import test_basemodel
+import os
 from models.user import User
-from sqlalchemy.exc import OperationalError
+from models.base_model import BaseModel
+import pep8
 
 
-class test_User(test_basemodel):
-    """Unittests for testing the User class"""
+class TestUser(unittest.TestCase):
+    """this will test the User class"""
 
-    def __init__(self, *args, **kwargs):
-        """ Instantiation of User instance """
-        super().__init__(*args, **kwargs)
-        self.name = "User"
-        self.value = User
-        self.user = User(email="Erney@chocorramo.com", password="conleche")
+    @classmethod
+    def setUpClass(cls):
+        """set up for test"""
+        cls.user = User()
+        cls.user.first_name = "Kevin"
+        cls.user.last_name = "Yook"
+        cls.user.email = "yook00627@gmamil.com"
+        cls.user.password = "secret"
 
-    def test_first_name(self):
-        """ test first name of user instance"""
-        self.assertEqual(self.user.first_name, None)
+    @classmethod
+    def teardown(cls):
+        """at the end of the test this will tear it down"""
+        del cls.user
 
-    def test_last_name(self):
-        """ test last name of user instance"""
-        self.assertEqual(self.user.last_name, None)
+    def tearDown(self):
+        """teardown"""
+        try:
+            os.remove("file.json")
+        except Exception:
+            pass
 
-    def test_email(self):
-        """ test email of user instance"""
+    def test_pep8_User(self):
+        """Tests pep8 style"""
+        style = pep8.StyleGuide(quiet=True)
+        p = style.check_files(['models/user.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
+
+    def test_checking_for_docstring_User(self):
+        """checking for docstrings"""
+        self.assertIsNotNone(User.__doc__)
+
+    def test_attributes_User(self):
+        """chekcing if User have attributes"""
+        self.assertTrue('email' in self.user.__dict__)
+        self.assertTrue('id' in self.user.__dict__)
+        self.assertTrue('created_at' in self.user.__dict__)
+        self.assertTrue('updated_at' in self.user.__dict__)
+        self.assertTrue('password' in self.user.__dict__)
+        self.assertTrue('first_name' in self.user.__dict__)
+        self.assertTrue('last_name' in self.user.__dict__)
+
+    def test_is_subclass_User(self):
+        """test if User is subclass of Basemodel"""
+        self.assertTrue(issubclass(self.user.__class__, BaseModel), True)
+
+    def test_attribute_types_User(self):
+        """test attribute type for User"""
         self.assertEqual(type(self.user.email), str)
-        self.assertEqual(self.user.email, "Erney@chocorramo.com")
-
-    def test_password(self):
-        """ test if the password is string """
         self.assertEqual(type(self.user.password), str)
-        self.assertEqual(self.user.password, "conleche")
+        self.assertEqual(type(self.user.first_name), str)
+        self.assertEqual(type(self.user.first_name), str)
 
-    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') != 'db', "not supported")
-    def test_without_mandatory_arguments(self):
-        """Check for mandatory arguments """
-        new = self.value()
-        with self.assertRaises(OperationalError):
-            try:
-                new.save()
-            except Exception as error:
-                models.storage._DBStorage__session.rollback()
-                raise error
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') == 'db',
+        "This test only work in Filestorage")
+    def test_save_User(self):
+        """test if the save works"""
+        self.user.save()
+        self.assertNotEqual(self.user.created_at, self.user.updated_at)
 
-    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') == 'db', "not supported")
-    def test_is_subclass(self):
-        """Check that State is a subclass of Basemodel"""
-        self.assertTrue(isinstance(self.user, User))
+    def test_to_dict_User(self):
+        """test if dictionary works"""
+        self.assertEqual('to_dict' in dir(self.user), True)
+
+
+if __name__ == "__main__":
+    unittest.main()
